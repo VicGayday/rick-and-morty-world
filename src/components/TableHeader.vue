@@ -1,35 +1,128 @@
 <template>
   <div class="row">
-    <div>{{ header.hero }}</div>
-    <div>{{ header.id }}</div>
-    <div>{{ header.name }} <button @click="() => sortCharactersbyName()">Sort</button></div>
-    <div>{{ header.status }}</div>
-    <div>{{ header.species }}</div>
-    <div>{{ header.type }}</div>
-    <div>{{ header.gender }} <button @click="() => sortCharactersbyGender()">Sort</button></div>
-    <div>{{ header.origin }} <button @click="() => sortCharactersbyOrigin()">Sort</button></div>
+    <div class="box">
+      <span>{{ header.hero }}</span>
+    </div>
+    <div class="box">
+      <span>{{ header.id }}</span>
+      <div class="btn-inner">
+        <button class="btn" @click="() => sortCharactersbyId('asc')">
+          <ArrowUp />
+        </button>
+        <button class="btn" @click="() => sortCharactersbyId('desc')">
+          <ArrowDown />
+        </button>
+      </div>
+    </div>
+    <div class="box">
+      <span>{{ header.name }}</span>
+      <div class="btn-inner">
+        <button class="btn" @click="() => sortCharactersbyName('asc', 'name')">
+          <ArrowUp />
+        </button>
+        <button class="btn" @click="() => sortCharactersbyName('desc', 'name')">
+          <ArrowDown />
+        </button>
+      </div>
+    </div>
+    <div class="box">
+      <span>{{ header.status }}</span>
+      <div class="btn-inner">
+        <button
+          class="btn"
+          @click="() => sortCharactersbyName('asc', 'status')"
+        >
+          <ArrowUp />
+        </button>
+        <button
+          class="btn"
+          @click="() => sortCharactersbyName('desc', 'status')"
+        >
+          <ArrowDown />
+        </button>
+      </div>
+    </div>
+    <div class="box">
+      <span>{{ header.species }}</span>
+      <div class="btn-inner">
+        <button
+          class="btn"
+          @click="() => sortCharactersbyName('asc', 'species')"
+        >
+          <ArrowUp />
+        </button>
+        <button
+          class="btn"
+          @click="() => sortCharactersbyName('desc', 'species')"
+        >
+          <ArrowDown />
+        </button>
+      </div>
+    </div>
+    <div class="box">
+      <span>{{ header.type }}</span>
+      <div class="btn-inner">
+        <button class="btn" @click="() => sortCharactersbyName('asc', 'type')">
+          <ArrowUp />
+        </button>
+        <button class="btn" @click="() => sortCharactersbyName('desc', 'type')">
+          <ArrowDown />
+        </button>
+      </div>
+    </div>
+    <div class="box">
+      <span>{{ header.gender }}</span>
+      <div class="btn-inner">
+        <button
+          class="btn"
+          @click="() => sortCharactersbyName('asc', 'gender')"
+        >
+          <ArrowUp />
+        </button>
+        <button
+          class="btn"
+          @click="() => sortCharactersbyName('desc', 'gender')"
+        >
+          <ArrowDown />
+        </button>
+      </div>
+    </div>
+    <div class="box">
+      <span>{{ header.origin }}</span>
+      <div class="btn-inner">
+        <button class="btn" @click="() => sortCharactersbyOrigin('asc')">
+          <ArrowUp />
+        </button>
+        <button class="btn" @click="() => sortCharactersbyOrigin('desc')">
+          <ArrowDown />
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue"
+import ArrowUp from "@/components/svg/ArrowUp.vue"
+import ArrowDown from "@/components/svg/ArrowDown.vue"
 
 export default defineComponent({
   name: "TableHeader",
-    props: {
-      sortCharactersbyName: {
-        type: Function,
-        required: true,
-      },
-      sortCharactersbyGender: {
-        type: Function,
-        required: true,
-      },
-       sortCharactersbyOrigin: {
-        type: Function,
-        required: true,
-      },
+  components: { ArrowUp, ArrowDown },
+  props: {
+    sortCharactersbyName: {
+      type: Function,
+      required: true,
     },
+    sortCharactersbyOrigin: {
+      type: Function,
+      required: true,
+    },
+    sortCharactersbyId: {
+      type: Function,
+      required: true,
+    },
+  },
   setup() {
     const header = {
       hero: "hero",
@@ -41,28 +134,29 @@ export default defineComponent({
       gender: "gender",
       origin: "origin",
     }
+
     return { header }
   },
 })
 </script>
-
 <style scoped>
-.row {
+.btn-inner {
   display: flex;
-}
-.row:last-child .box {
-  border-bottom: 1px solid var(--text-primary);
-}
-.row div {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%;
-  border: 1px solid black;
-  border-bottom: none;
-  padding: 10px;
-  display: flex;
-  justify-content: left;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 16px;
+}
+.btn {
+  border: none;
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.btn:hover {
+  background-color: whitesmoke;
 }
 </style>

@@ -1,0 +1,26 @@
+.row {
+  display: flex;
+}
+.row:last-child .box {
+  border-bottom: var(--border-table);
+}
+.box {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  border: var(--border-table);
+  border-right: 0;
+  border-bottom: none;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.box:nth-child(1) {
+  flex-basis: 350px;
+}
+.box:last-child {
+  border-right: var(--border-table);
+}

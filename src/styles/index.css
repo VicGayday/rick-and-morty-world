@@ -1,0 +1,29 @@
+@import "reset.css";
+@import "variables.css";
+@import "table.css";
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;900&display=swap");
+
+body {
+  color: var(--text-primary);
+  font: var(--font-m);
+  margin: 0 auto;
+  max-width: 1920px;
+  min-height: 769px;
+  background: var(--background-primary);
+}
+.container {
+  max-width: 1400px;
+  min-height: 100vh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+.msg {
+  font: var(--font-s);
+  color: var(--text-secondary);
+}
+h1 {
+  color: var(--text-primary);
+  font-weight: 900;
+  font-size: 56px;
+}

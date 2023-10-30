@@ -1,16 +1,20 @@
 <template>
   <div class="content">
+    <MainHeader />
     <TableHeader
       :sortCharactersbyName="sortCharactersbyName"
-      :sortCharactersbyGender="sortCharactersbyGender"
       :sortCharactersbyOrigin="sortCharactersbyOrigin"
+      :sortCharactersbyId="sortCharactersbyId"
     />
-    <CharacterItem
-      v-for="item in listOfCharacters"
-      :key="item.uuid"
-      :character="item"
-      @select="selectCharacter"
-    />
+    <div v-if="!isLoading">
+      <CharacterItem
+        v-for="item in listOfCharacters"
+        :key="item.id"
+        :character="item"
+        @select="selectCharacter"
+      />
+    </div>
+    <div class="center" v-else><TheLoader /></div>
     <CharacterModal v-model:visible="visible">
       <CharacterCard :character="character" />
     </CharacterModal>
@@ -18,136 +22,99 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, ref, Ref } from "vue"
-import { Character, SelectCharacter} from "@/components/types"
+import { defineComponent, onMounted, ref, Ref } from "vue"
+import { Character, SelectCharacter } from "@/components/types"
 import CharacterItem from "@/components/CharacterItem.vue"
-import CharacterModal from "@/components/CharacterModal.vue"
+import CharacterModal from "@/components/UI/CharacterModal.vue"
 import CharacterCard from "@/components/CharacterCard.vue"
 import TableHeader from "@/components/TableHeader.vue"
+import MainHeader from "@/components/MainHeader.vue"
+import TheLoader from "@/components/UI/TheLoader.vue"
 
-import axios from "axios"
-import { v4 as uuidv4 } from "uuid"
+import { fetchAllPages } from "@/components/helper"
 
 export default defineComponent({
   name: "MainPage",
-  components: { CharacterItem, CharacterModal, TableHeader, CharacterCard },
+  components: {
+    CharacterItem,
+    CharacterModal,
+    TableHeader,
+    CharacterCard,
+    MainHeader,
+    TheLoader,
+  },
 
   async setup() {
     const listOfCharacters: Ref<Character[]> = ref([])
     const character: Ref<SelectCharacter> = ref()
+    const isLoading = ref(false)
+    const page: Ref<number> = ref(1)
+    const totalPage: Ref<number> = ref(42)
     const visible: Ref<boolean> = ref(false)
-    const genderOrder = {
-      "unknown": 0,
-      "Female": 1,
-      "Male": 2
-    }
-    let nextPage: string | null = "https://rickandmortyapi.com/api/character";
+    const sortAsc: Ref<boolean> = ref(false)
 
-      async function fetchAllPages() {
-        let url = "https://rickandmortyapi.com/api/character";
-        let responses = [];
+    type name = "gender" | "name" | "status" | "species" | "type" | "created"
+    async function mainFetch() {
+      try {
+        isLoading.value = true
 
-        while(url) {
-          const response = await axios.get(url);
-          responses.push(response.data);
-          url = response.data.info.next;
-        }
-
-        return responses;
-      }
-
-      // async function fetchCharacters() {
-      //   const responses = await fetchAllPages();
-      //   responses.forEach(response => {
-      //     const characters = response.results.map((character: Ref<SelectCharacter>) => ({
-      //       ...character,
-      //       uuid: uuidv4(),
-      //     }));
-      //     listOfCharacters.value = [...listOfCharacters.value, ...characters];
-      //   });
-      // }
-
-
-    async function fetchCharacters() {
-      if (nextPage) {
-        try {
-          const response = await axios(nextPage);
-          const characters = response.data.results.map((character:  Ref<SelectCharacter>) => ({
-            ...character,
-            uuid: uuidv4(),
-          }));
-          listOfCharacters.value = [...listOfCharacters.value, ...characters];
-           if (response.data.info.next) {
-        nextPage = response.data.info.next;
-        setTimeout(fetchCharacters, 1000);
-          } else {
-            nextPage = null;
-          }
-        } catch (error) {
-          console.log(error);
-        }
+        listOfCharacters.value = await fetchAllPages()
+      } catch (error) {
+        console.error("Глобальная ошибка:", error)
+      } finally {
+        isLoading.value = false
       }
     }
-
-    // const handleScroll = () => {
-    //   const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-    //   const distanceUntilScreenEnds = 200;
-
-    //   if (clientHeight + scrollTop >= scrollHeight - distanceUntilScreenEnds) {
-    //     fetchCharacters();
-    //   }
-    // };
 
     const selectCharacter = (it: Character) => {
-      // if (character.value !== undefined) {
-
       character.value = it
-      console.log("1111", character.value)
       visible.value = true
-      // }
     }
 
-    const sortCharactersbyName = async () => {
-      await fetchCharacters();
-      listOfCharacters.value.sort((a, b) => a.name.localeCompare(b.name));
-    };
+    const sortCharactersbyName = (s: string, name: name) => {
+      if (s === "asc") {
+        listOfCharacters.value.sort((a, b) => a[name].localeCompare(b[name]))
+      } else {
+        listOfCharacters.value.sort((a, b) => b[name].localeCompare(a[name]))
+      }
+    }
 
-    const sortCharactersbyOrigin = async () => {
-       await fetchCharacters();
-       listOfCharacters.value.sort((a, b) => a.origin.name.localeCompare(b.origin.name, undefined, { sensitivity: "base" }));
-    };
+    const sortCharactersbyId = (s: string) => {
+      if (s === "asc") {
+        listOfCharacters.value.sort((a, b) => a.id - b.id)
+      } else {
+        listOfCharacters.value.sort((a, b) => b.id - a.id)
+      }
+    }
 
-    const sortCharactersbyGender = async () => {
-        await fetchCharacters();
-        listOfCharacters.value.sort((a, b) => {
-        const keyA = a.gender as keyof typeof genderOrder;
-        const keyB = b.gender as keyof typeof genderOrder;
-        return genderOrder[keyA] - genderOrder[keyB];
-      });
-    };
-
-
+    const sortCharactersbyOrigin = (s: string) => {
+      if (s === "asc") {
+        listOfCharacters.value.sort((a, b) =>
+          a.origin.name.localeCompare(b.origin.name)
+        )
+      } else {
+        listOfCharacters.value.sort((a, b) =>
+          b.origin.name.localeCompare(a.origin.name)
+        )
+      }
+    }
 
     onMounted(() => {
-      fetchCharacters()
-      //  window.addEventListener("scroll", handleScroll);
+      mainFetch()
     })
 
-    // onUnmounted(() => {
-    //   window.removeEventListener("scroll", handleScroll);
-    // });
-
     return {
-      fetchCharacters,
+      mainFetch,
       listOfCharacters,
       character,
       selectCharacter,
-      // selectedCharacter,
+      isLoading,
+      page,
+      totalPage,
       visible,
-      // handleScroll,
+      sortAsc,
       sortCharactersbyName,
-      genderOrder,
-      sortCharactersbyGender,
+      sortCharactersbyId,
       sortCharactersbyOrigin,
     }
   },
@@ -158,5 +125,11 @@ export default defineComponent({
 .content {
   display: flex;
   flex-direction: column;
+}
+.center {
+  display: flex;
+  padding-top: 100px;
+  align-items: center;
+  justify-content: center;
 }
 </style>

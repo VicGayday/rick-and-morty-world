@@ -12,7 +12,6 @@ import { defineComponent } from "vue"
 export default defineComponent({
   name: "CharacterModal",
   props: {
-    // character: { type: Object as () => Character | null, required: false },
     visible: { type: Boolean, default: false },
   },
   setup(props, { emit }) {
@@ -43,7 +42,8 @@ export default defineComponent({
   background-color: #fefefe;
   margin: auto;
   padding: 20px;
-  border: 1px solid #888;
+  border: var(--border-table);
+  border-radius: 15px;
   width: 80%;
 }
 </style>
